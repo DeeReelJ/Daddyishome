@@ -1,0 +1,170 @@
+{% load static %}
+{% load bootstrap_pagination %}
+<!doctype html>
+<html lang="en">
+<head>
+    <link rel="shortcut icon" href="{% static 'favicon.ico' %}" type="image/x-icon">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>{% if clients_waiting %}WAITING CLIENTS{% else %}CHILL{% endif %}</title>
+
+
+    <!-- Bootstrap core CSS -->
+    <link href="{% static 'css/bootstrap.css' %}" rel="stylesheet">
+
+    <!-- Custom styles for this template -->
+    <link href="../static/css/main.css" rel="stylesheet">
+    <script
+            src="https://code.jquery.com/jquery-3.5.1.js"
+            integrity="sha256-QWo7LDvxbWT2tbbQ97B53yJnYU3WhH/C8ycbRAkjPDc="
+            crossorigin="anonymous"></script>
+    <script src="{% static 'popper.min.js' %}"></script>
+    <script src="{% static 'bootstrap.min.js' %}"></script>
+    <script type="text/javascript">
+        function call_request(elem) {
+            var data = 'client=' + elem.getAttribute("data-client") + '&page=' + elem.getAttribute("data-page")
+            send_request(data)
+        }
+        function delete_client(elem) {
+            var client_id = elem.getAttribute("data-client")
+            $.ajax({
+                type: 'POST',
+                async: true,
+                url: '/delete_client/',
+                data: 'client_id=' + client_id,
+                success: function(data) {
+                    document.getElementById('client_' + client_id).remove()
+                },
+                dataType: 'json',
+            });
+        }
+        function send_request(data_to_send) {
+            $.ajax({
+                type: 'POST',
+                async: true,
+                url: '/set_redirect/',
+                data: data_to_send,
+                success: function(data) {
+                    console.log(data_to_send)
+                },
+                dataType: 'json',
+            });
+        }
+    </script>
+</head>
+<body>
+<div class="container-fluid">
+    <div class="row" style="margin: 25px 0">
+        <div class="col-8">
+            <a href="/clients/?page=1" class="btn btn-secondary" >Main Page</a>
+            <button id="onlineOnly" class="btn btn-outline-success" onclick="onlineOnly()">Online only</button>
+            <button id="dataOnly" onclick="dataOnly()" class="btn btn-outline-primary">Data provided</button>
+            <a href="/clients/?dl=t" class="btn btn-outline-danger">Deleted</a>
+            <b style="margin-left: 15px">Notifications:</b>
+            {% if AFK == '1' %}
+                <a href="/switch_afk" class="btn btn-sm btn-success">ON</a>
+            {% else %}
+                <a href="/switch_afk" class="btn btn-sm btn-warning">OFF</a>
+            {% endif %}
+        </div>
+        <div class="col-4">
+            <button onclick="PermanentDelete()" style="float: right; margin-right: 3px" class="btn btn-sm btn-danger">Permanent delete</button>
+            <button onclick="DeleteAll()" style="float: right; margin-right: 3px" class="btn btn-sm btn-danger">Delete all</button>
+            <button onclick="DeleteSelected()" style="float: right; margin-right: 3px" class="btn btn-sm btn-danger">Delete selected</button>
+            <a href="{% url 'settings' %}">
+                <button style="float: right; margin-right: 3px" class="btn btn-sm btn-primary">Settings</button>
+            </a>
+        </div>
+    </div>
+    <div id="clients">
+        {% include 'clientsTable.html' %}
+    </div>
+    {% bootstrap_paginate clients %}
+
+</div>
+<audio id="notify" src="{% static 'mainsound.mp3' %}" preload="auto"></audio>
+</body>
+<script type="text/javascript">
+    var toDeleteList = []
+    function onlineOnly () {
+        if (window.location.href.includes('&online=true')) {
+            window.location.href = window.location.href.replace('&online=true', '')
+        } else {
+            window.location.href = window.location.href + "&online=true"
+        }
+    }
+    function dataOnly () {
+        if (window.location.href.includes('&data=true')) {
+            window.location.href = window.location.href.replace('&data=true', '')
+        } else {
+            window.location.href = window.location.href + "&data=true"
+        }
+    }
+    function DeleteAll() {
+        if (window.confirm('DELETE ALL RECORDS'))
+        {
+            window.location.href = '/delete_all'
+        }
+    }
+
+    function PermanentDelete() {
+        if (window.confirm('EMPTY DELETED USERS?'))
+        {
+            window.location.href = '/delete_all_deleted'
+        }
+    }
+
+    function ToDeleteListChanger(client_id) {
+        var index_of_elem = toDeleteList.indexOf(client_id)
+        if (index_of_elem === -1) {
+            toDeleteList.push(client_id)
+        } else {
+            toDeleteList.splice(index_of_elem, 1)
+        }
+        console.log(toDeleteList)
+    }
+    function DeleteSelected() {
+        window.location.href = '/delete_selected?list=' + toDeleteList.join(',')
+    }
+
+    $(document).ready(function () {
+        if (window.location.href.includes('&online=true')) {
+            var online_filter = true
+            $('#onlineOnly').removeClass('btn-outline-success').addClass('btn-dark')
+        }
+        if (window.location.href.includes('&data=true')) {
+            var data_filter = true
+            $('#dataOnly').removeClass('btn-outline-primary').addClass('btn-dark')
+        }
+        var clients_waiting = {{ clients_waiting }}
+        var clients_online = {{ clients_online }}
+            function playSound() {
+                return $("#notify")[0].play()
+            }
+        if (clients_waiting !== 0) {
+            setInterval(playSound, 1000)
+        }
+        function get_updates() {
+            $.ajax({
+                type: 'POST',
+                async: true,
+                url: '/admin_updates/',
+                data: 'user_count=' + clients_waiting + '&clients_online=' + clients_online + '&online_filter='
+                    + online_filter + '&data_filter=' + data_filter,
+                success: function(data) {
+                    if (data['action'] !== 'hold') {
+                        $('#clients').html(data['table'])
+                        clients_waiting = data['clients_waiting']
+                        clients_online = data['clients_online']
+                    }
+
+                },
+                dataType: 'json',
+            });
+        }
+        if (!window.location.href.includes('?dl=t')) {
+            setInterval(get_updates, 2000)
+        }
+    });
+</script>
+</html>
