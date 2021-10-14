@@ -1,0 +1,17 @@
+asgiref==3.3.1
+certifi==2020.12.5
+chardet==4.0.0
+Django==3.1.3
+django-basicauth==0.5.3
+django-bootstrap-pagination==1.7.1
+django-crispy-forms==1.12.0
+django-user-agents==0.4.0
+idna==2.10
+pyTelegramBotAPI==3.7.6
+pytz==2020.5
+requests==2.25.1
+schedule==0.6.0
+sqlparse==0.4.1
+ua-parser==0.10.0
+urllib3==1.26.3
+user-agents==2.2.0
